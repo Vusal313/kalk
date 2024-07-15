@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <style>
-  body {
+    body {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,6 +27,10 @@
     padding: 20px;
     max-width: 400px;
     width: 100%;
+    max-height: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .calculator-screen {
@@ -39,7 +43,6 @@
     padding: 10px 20px;
     font-size: 2.5rem;
     border-radius: 5px;
-    margin-bottom: 10px;
 }
 
 .history-toggle {
@@ -50,7 +53,6 @@
     padding: 15px;
     font-size: 1.2rem;
     cursor: pointer;
-    margin-bottom: 10px;
     border-radius: 5px;
     transition: background-color 0.3s, transform 0.1s;
 }
@@ -148,6 +150,38 @@ button:active {
     display: none;
 }
 
+/* Responsive Styles */
+
+@media (max-width: 500px) {
+    .calculator {
+        padding: 10px;
+    }
+
+    .calculator-screen {
+        font-size: 2rem;
+        height: 60px;
+        padding: 10px 15px;
+    }
+
+    .history-toggle {
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    .calculator-buttons button {
+        font-size: 1rem;
+        height: 50px;
+    }
+
+    .history {
+        max-height: 100px;
+    }
+
+    .history-list li {
+        font-size: 0.9rem;
+    }
+}
+
 </style>
 <body>
     <div class="calculator">
@@ -186,7 +220,7 @@ button:active {
         </div>
     </div>
     <script >
-      document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
     const calculatorScreen = document.querySelector('.calculator-screen');
     const buttons = document.querySelectorAll('button');
     const historyList = document.querySelector('.history-list');
@@ -282,8 +316,8 @@ button:active {
             if (value === '=') {
                 secondValue = parseFloat(currentInput);
                 const result = calculate(firstValue, secondValue, operator);
-                currentInput = `${parseFloat(result.toFixed(7))}`;
                 addHistory(`${firstValue} ${operator} ${secondValue} = ${result}`);
+                currentInput = `${parseFloat(result.toFixed(7))}`;
                 firstValue = '';
                 operator = '';
                 waitingForSecondValue = false;
