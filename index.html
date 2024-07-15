@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Hesap Makinesi</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #2c2c2c;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.calculator {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    background-color: #1e1e1e;
+    color: white;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.calculator-screen {
+    width: 100%;
+    height: 80px;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    text-align: right;
+    padding: 10px 20px;
+    font-size: 2.5rem;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.history-toggle {
+    width: 100%;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.history-toggle:hover {
+    background-color: #4cae4c;
+}
+
+.history-toggle:active {
+    transform: translateY(2px);
+}
+
+.history {
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.history h3 {
+    margin: 0 0 10px;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-list li {
+    background: #444;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+button {
+    height: 60px;
+    border: none;
+    background-color: #e0e0e0;
+    color: black;
+    font-size: 1.2rem;
+    transition: background-color 0.3s, transform 0.1s;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d0d0d0;
+}
+
+button:active {
+    transform: translateY(4px);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.operator {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.operator:hover {
+    background-color: #ec971f;
+}
+
+.all-clear {
+    background-color: #d9534f;
+    color: white;
+}
+
+.all-clear:hover {
+    background-color: #c9302c;
+}
+
+.equal-sign {
+    background-color: #5cb85c;
+    color: white;
+    grid-column: span 4;
+}
+
+.equal-sign:hover {
+    background-color: #4cae4c;
+}
+
+.hidden {
+    display: none;
+}
+
+</style>
+<body>
+    <div class="calculator">
+        <input type="text" class="calculator-screen" value="" disabled />
+        <button class="history-toggle">Tarihçe</button>
+        <div class="history hidden">
+            <h3>Tarihçe</h3>
+            <ul class="history-list"></ul>
+        </div>
+        <div class="calculator-buttons">
+            <button class="operator" value="+">+</button>
+            <button class="operator" value="-">-</button>
+            <button class="operator" value="*">*</button>
+            <button class="operator" value="/">/</button>
+            <button value="7">7</button>
+            <button value="8">8</button>
+            <button value="9">9</button>
+            <button value="4">4</button>
+            <button value="5">5</button>
+            <button value="6">6</button>
+            <button value="1">1</button>
+            <button value="2">2</button>
+            <button value="3">3</button>
+            <button value="0">0</button>
+            <button value=".">.</button>
+            <button value="backspace">←</button>
+            <button class="operator" value="sqrt">√</button>
+            <button class="operator" value="sin">sin</button>
+            <button class="operator" value="cos">cos</button>
+            <button class="operator" value="tan">tan</button>
+            <button class="operator" value="log10">log</button>
+            <button class="operator" value="ln">ln</button>
+            <button class="operator" value="**">^</button>
+            <button class="all-clear" value="all-clear">AC</button>
+            <button class="equal-sign operator" value="=">=</button>
+        </div>
+    </div>
+    <script >
+      document.addEventListener('DOMContentLoaded', function () {
+    const calculatorScreen = document.querySelector('.calculator-screen');
+    const buttons = document.querySelectorAll('button');
+    const historyList = document.querySelector('.history-list');
+    const historyToggle = document.querySelector('.history-toggle');
+    const historyContainer = document.querySelector('.history');
+    const calculatorButtons = document.querySelector('.calculator-buttons');
+
+    let currentInput = '';
+    let operator = '';
+    let firstValue = '';
+    let secondValue = '';
+    let waitingForSecondValue = false;
+
+    function updateScreen(value) {
+        calculatorScreen.value = value;
+    }
+
+    function handleOperator(nextOperator) {
+        const value = parseFloat(currentInput);
+
+        if (operator && waitingForSecondValue) {
+            operator = nextOperator;
+            return;
+        }
+
+        if (firstValue === '') {
+            firstValue = value;
+        } else if (operator) {
+            const result = calculate(firstValue, value, operator);
+            currentInput = `${parseFloat(result.toFixed(7))}`;
+            addHistory(`${firstValue} ${operator} ${value} = ${result}`);
+            firstValue = result;
+        }
+
+        waitingForSecondValue = true;
+        operator = nextOperator;
+    }
+
+    function calculate(first, second, operator) {
+        switch (operator) {
+            case '+':
+                return first + second;
+            case '-':
+                return first - second;
+            case '*':
+                return first * second;
+            case '/':
+                return first / second;
+            case 'sqrt':
+                return Math.sqrt(first);
+            case 'sin':
+                return Math.sin(first);
+            case 'cos':
+                return Math.cos(first);
+            case 'tan':
+                return Math.tan(first);
+            case 'log10':
+                return Math.log10(first);
+            case 'ln':
+                return Math.log(first);
+            case '**':
+                return Math.pow(first, second);
+            default:
+                return second;
+        }
+    }
+
+    function addHistory(entry) {
+        const historyItem = document.createElement('li');
+        historyItem.textContent = entry;
+        historyList.appendChild(historyItem);
+    }
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            const { value } = event.target;
+
+            if (value === 'all-clear') {
+                currentInput = '';
+                firstValue = '';
+                operator = '';
+                waitingForSecondValue = false;
+                updateScreen(currentInput);
+                return;
+            }
+
+            if (value === 'backspace') {
+                currentInput = currentInput.slice(0, -1);
+                updateScreen(currentInput);
+                return;
+            }
+
+            if (value === '=') {
+                secondValue = parseFloat(currentInput);
+                const result = calculate(firstValue, secondValue, operator);
+                currentInput = `${parseFloat(result.toFixed(7))}`;
+                addHistory(`${firstValue} ${operator} ${secondValue} = ${result}`);
+                firstValue = '';
+                operator = '';
+                waitingForSecondValue = false;
+                updateScreen(currentInput);
+                return;
+            }
+
+            if (['+', '-', '*', '/', 'sqrt', 'sin', 'cos', 'tan', 'log10', 'ln', '**'].includes(value)) {
+                handleOperator(value);
+                currentInput = '';
+                return;
+            }
+
+            if (waitingForSecondValue) {
+                currentInput = value;
+                waitingForSecondValue = false;
+            } else {
+                currentInput += value;
+            }
+
+            updateScreen(currentInput);
+        });
+    });
+
+    historyToggle.addEventListener('click', function () {
+        const isHistoryVisible = historyContainer.style.display === 'block';
+        historyContainer.style.display = isHistoryVisible ? 'none' : 'block';
+        calculatorButtons.style.display = isHistoryVisible ? 'grid' : 'none';
+        historyToggle.textContent = isHistoryVisible ? 'Tarihçe' : 'Geri Dön';
+    });
+});
+
+    </script>
+</body>
+</html>
